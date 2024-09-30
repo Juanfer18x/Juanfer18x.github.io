@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Método de las Rebanadas - Volumen de Sólidos</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        /* Estilo general del cuerpo */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Contenedor principal */
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Títulos */
+        h1, h2 {
+            text-align: center;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Gráfico y detalles */
+        #plot {
+            width: 100%;
+            height: 400px;
+            margin-bottom: 30px;
+        }
+
+        /* Estilo del texto */
+        p {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Sección de detalles */
+        .details {
+            background-color: #f0f1f5;
+            padding: 20px;
+            margin-bottom: 40px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .details p {
+            margin: 0;
+            font-size: 1.05em;
+        }
+
+        /* Tabla estilizada */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #fafafa;
+            color: #333;
+            font-weight: 600;
+        }
+
+        /* Estilo de botones */
+        .btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 1.1em;
+            margin-top: 20px;
+            text-align: center;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Volumen de Sólidos - Método de las Rebanadas</h1>
+        <p>Calcula el volumen de un sólido generado por la rotación de una función alrededor del eje <strong>x</strong>, utilizando el método de las rebanadas. La función utilizada es una semicircunferencia: <code>f(x) = sqrt(1 - x²)</code>.</p>
+        
+        <!-- Gráfico -->
+        <div id="plot"></div>
+
+        <!-- Detalles del cálculo -->
+        <div class="details">
+            <p><strong>Función:</strong> f(x) = √(1 - x²)</p>
+            <p><strong>Intervalo:</strong> [0, 1]</p>
+            <p><strong>Número de rebanadas:</strong> 100</p>
+            <p><strong>Δx:</strong> <span id="delta_x"></span></p>
+            <p><strong>Volumen:</strong> <span id="volumen"></span></p>
+        </div>
+
+        <!-- Tabla de áreas -->
+        <h2>Áreas por Rebanada</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>x</th>
+                    <th>f(x)</th>
+                    <th>Área de la rebanada (πf(x)²)</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-areas"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // Definir la función curva
+        function funcion(x) {
+            return Math.sqrt(1 - x * x); // Semicircunferencia
+        }
+
+        // Parámetros
+        const a = 0;  // Límite inferior
+        const b = 1;  // Límite superior
+        const n = 100;  // Número de rebanadas
+        const delta_x = (b - a) / n;
+
+        // Calcular volumen por el método de las rebanadas
+        let volumen_total = 0;
+        let x_vals = [];
+        let y_vals = [];
+        let tablaHTML = "";
+
+        for (let i = 0; i <= n; i++) {
+            let x_i = a + i * delta_x;
+            let radio = funcion(x_i);
+            let area_rebanada = Math.PI * (radio ** 2);
+            let volumen_rebanada = area_rebanada * delta_x;
+            volumen_total += volumen_rebanada;
+
+            // Almacenar los valores para graficar
+            x_vals.push(x_i);
+            y_vals.push(radio);
+
+            // Agregar fila a la tabla
+            tablaHTML += `<tr>
+                            <td>${x_i.toFixed(4)}</td>
+                            <td>${radio.toFixed(4)}</td>
+                            <td>${area_rebanada.toFixed(4)}</td>
+                          </tr>`;
+        }
+
+        // Mostrar el volumen calculado
+        document.getElementById('volumen').innerText = `${volumen_total.toFixed(4)}`;
+        document.getElementById('delta_x').innerText = `${delta_x.toFixed(4)}`;
+
+        // Mostrar la tabla de áreas por rebanada
+        document.getElementById('tabla-areas').innerHTML = tablaHTML;
+
+        // Graficar la curva con Plotly
+        const trace1 = {
+            x: x_vals,
+            y: y_vals,
+            fill: 'tozeroy',
+            type: 'scatter',
+            mode: 'lines',
+            line: { color: '#007bff' },
+            name: 'Curva de la función'
+        };
+
+        const layout = {
+            title: '',
+            xaxis: { title: 'x', showgrid: false },
+            yaxis: { title: 'f(x)', showgrid: false },
+            plot_bgcolor: "#f4f4f9",
+            paper_bgcolor: "#f4f4f9"
+        };
+
+        Plotly.newPlot('plot', [trace1], layout);
+    </script>
+</body>
+</html>
+
+
+
+
